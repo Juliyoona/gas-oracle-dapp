@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Gas Oracle DApp</title>
+</head>
+<body>
+  <h1>Gas Oracle DApp</h1>
+  <p>
+    預測 gas 價格：<input id="gasInput" type="number" /> <button onclick="submitPrediction()">提交預測</button>
+  </p>
+  <p>
+    <button onclick="getPredictions()">查詢我的預測紀錄</button>
+  </p>
+  <ul id="result"></ul>
+
+  <!-- ⚠️ 將 ethers.js 放在這裡：script 執行前就能保證已載入 -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+
+  <script>
+    const contractAddress = "0x7ea4a7E139C98D6835429763EE53B10208B14301";
+    const abi = [
+      "function submitPrediction(uint256 _gasPrice) public",
+      "function getMyPredictions() public view returns (tuple(uint256 timestamp, uint256 predictedGasPrice)[])"
+    ];
+
+    async function submitPrediction() {
+      console.log("開始連線");
+      await window.ethereum.request({ method: 'eth_requestAccounts' });
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(contractAddress, abi, signer);
+
+      const gas = parseInt(document.getElementById("gasInput").value);
+      if (isNaN(gas)) {
+        alert("請輸入有效的整數！");
+        return;
+      }
+
+      const tx = await contract.submitPrediction(gas);
+      console.log("交易 hash:", tx.hash);
+      await tx.wait();
+      alert("預測已提交！");
+    }
+
+    async function getPredictions() {
+      await window.ethereum.request({ method: 'eth_requestAccounts' });
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(contractAddress, abi, signer);
+
+      const predictions = await contract.getMyPredictions();
+      const resultUl = document.getElementById("result");
+      resultUl.innerHTML = "";
+      for (let i = 0; i < predictions.length; i++) {
+        const time = new Date(predictions[i].timestamp * 1000);
+        const gas = predictions[i].predictedGasPrice;
+        const li = document.createElement("li");
+        li.innerText = `時間: ${time.toLocaleString()}，預測 Gas: ${gas}`;
+        resultUl.appendChild(li);
+      }
+    }
+  </script>
+</body>
+</html>
