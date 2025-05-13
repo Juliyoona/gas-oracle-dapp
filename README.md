@@ -31,7 +31,7 @@ This is a simple decentralized application (DApp) that allows users to submit an
 
 You can try the DApp here:
 
-[https://juliyona.github.io/gas-oracle-dapp/](https://github.com/Juliyoona/gas-oracle-dapp)
+[https://juliyoona.github.io/gas-oracle-dapp/]
 
 > Make sure your MetaMask is connected to the Sepolia testnet and you have some test ETH.
 
